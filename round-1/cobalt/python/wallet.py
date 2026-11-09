@@ -37,7 +37,7 @@ class WalletService:
 
     def available(self, account_id: str) -> int:
         bal = self._require(account_id)
-        return bal
+        return bal - self._active_holds(account_id)
 
     def authorize(self, account_id: str, cents: int) -> Hold:
         self._require(account_id)
@@ -53,12 +53,18 @@ class WalletService:
 
     def capture(self, hold_id: str) -> Hold:
         h = self._get(hold_id)
+        if h.status == HoldStatus.VOIDED:
+            raise ValueError("cannot capture a voided hold")
+        if h.status == HoldStatus.CAPTURED:
+            return h
         self._balance[h.account_id] -= h.amount
         h.status = HoldStatus.CAPTURED
         return h
 
     def void(self, hold_id: str) -> Hold:
         h = self._get(hold_id)
+        if h.status == HoldStatus.CAPTURED:
+            raise ValueError("cannot void a captured hold")
         h.status = HoldStatus.VOIDED
         return h
 

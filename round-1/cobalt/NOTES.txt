@@ -1,0 +1,40 @@
+authorized -> reserved
+captured -> settled (subtracted from the balance)
+voided -> released
+
+Definitions:
+- `balance` is the amount of money in the accout, irrespective of any active holds.
+- `available` is the amount of 'spendable' money not currently held.
+- `authorized hold` doesn't affect the `balance`, but affects the `available` spendable amount.
+- `captured hold` will go further to affect the `balance` thereby 'sealing' the transaction.
+- `voided hold` will released the 'hold' on the available balance, freeing up the 'put aside' amount.
+
+Life cycle:
+hold: held -> captured or held -> voided
+- this means a `captured` hold cannot transition to `voided`, and vice versa.
+
+- calling capture more than once on an already captured hold should do nothing (confirm with hold status), same thing for void.
+- attempting to capture a hold with a voided hold status should throw an exception, and vice versa.
+
+Current state:
+available:
+- incorrect implementation
+- returns the `balance`, instead of `balance - active_hold`
+
+authorize:
+- properly checks `available`, and not `balance`
+
+_active_holds:
+- correctly returns the sum of all holds with hold status of held.
+
+capture:
+- there's no hold status check which causes duplicate transaction to happen.
+
+
+Complete fix:
+1. Available balance now reflects active holds.
+2. Capture method now guards against duplicate transaction and capturing a voided transaction.
+3. Void method now prevent voiding a captured transaction. 
+
+Questions:
+1. What is an active hold?

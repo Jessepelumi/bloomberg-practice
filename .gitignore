@@ -21,3 +21,5 @@ dpractice/
 # local session helper, not part of the pack set
 random.py
 names.json
+
+.vscode/
